@@ -1,0 +1,45 @@
+name: VALIS experiment
+name_short: app_engine_valis_exp
+version: 0.1.0
+namespace: be.cytomine.research.exp.valis
+$schema: https://cytomine.com/schema-store/tasks/task.v0.json
+authors:
+  - first_name: Maxime
+    last_name: Amodei
+    organization: ULiege
+    email: maxime.amodei@uliege.be
+    is_contact: true
+
+configuration:
+  input_folder: /inputs
+  output_folder: /outputs
+  image:
+    file: /image.tar
+
+inputs:
+  fixed_image:
+    display_name: Fixed Image
+    type: image
+    description: Image that remains fixed during the registration
+  moving_image:
+    display_name: Moving Image
+    type: image
+    description: Image that moves during the registration
+  geometry_moving:
+    display_name: Geometry on Moving Image
+    type: geometry
+    description: Geometry that will be transformed from the moving image to the fixed image
+
+outputs:
+  deformed_moving:
+    display_name: Deformed Moving Image
+    type: image
+    description: Moving image deformed to match the fixed image
+    dependencies:
+      derived_from: inputs/moving_image
+  deformed_geometry:
+    display_name: Deformed Geometry
+    type: geometry
+    description: Mapping from geometry_moving to the deformed image
+    dependencies:
+      derived_from: inputs/geometry_moving
