@@ -29,6 +29,26 @@ inputs:
     display_name: Geometry on Moving Image
     type: geometry
     description: Geometry that will be transformed from the moving image to the fixed image
+  crop:
+    display_name: Cropping Mode
+    type:
+      id: enumeration
+      values: ["reference", "all", "overlap"]
+    description: The region to consider for the registration. "all" is recommended
+  registration_type:
+    display_name: Registration Type
+    type:
+      id: enumeration
+      values: ["rigid", "non-rigid", "micro"]
+    description: The type of registration (rigid, non-rigid at low resolution, non-rigid at high resolution)
+  max_proc_size:
+    display_name: Low Resolution
+    type: number
+    description: The resolution on which the rigid and non-rigid registrations are performed
+  micro_max_proc_size:
+    display_name: High Resolution
+    type: number
+    description: The resolution on which the micro registration is performed. Must be given even if registration_type is not micro.
 
 outputs:
   deformed_moving:

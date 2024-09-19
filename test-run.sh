@@ -11,6 +11,10 @@ if [ ! -d $IDIR ]; then
     cp data/s1-36.tiff "${IDIR}/fixed_image"
     cp data/s1-37.tiff "${IDIR}/moving_image"
     cp data/geo.json "${IDIR}/geometry_moving"
+    cp data/crop.txt "${IDIR}/crop"
+    cp data/registration_type.txt "${IDIR}/registration_type"
+    cp data/max_proc_size.txt "${IDIR}/max_proc_size"
+    cp data/micro_max_proc_size.txt "${IDIR}/micro_max_proc_size"
 fi
 
 if [ ! -d $ODIR ]; then

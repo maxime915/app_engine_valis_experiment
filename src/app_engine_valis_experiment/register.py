@@ -53,9 +53,20 @@ def register(data: InputData):
             name="main",  # useless -> each container will only see one job
             reference_img_f=data.fixed_image.name,
             align_to_reference=True,
-            crop="all",
+            crop=data.crop,
+            max_image_dim_px=data.max_proc_size,
+            max_processed_image_dim_px=data.max_proc_size,
+            max_non_rigid_registration_dim_px=data.max_proc_size,
+            non_rigid_registrar_cls=(
+                None
+                if data.registration_type == "rigid"
+                else registration.DEFAULT_NON_RIGID_CLASS
+            ),  # type: ignore
         )
         _ = registrar.register()
+
+        if data.registration_type == "micro":
+            registrar.register_micro(max_non_rigid_registration_dim_px=data.micro_max_proc_size)
 
         moving_slide: registration.Slide = registrar.get_slide(
             data.moving_image.name
@@ -67,7 +78,9 @@ def register(data: InputData):
         # VALIS expects a different format for GEOJSON
         dup_geo = work_dir / "tmp-geo.json"
         with open(dup_geo, "x", encoding="utf8") as dup_geo_f:
-            json.dump({"type": "INVALID", "features": [{"geometry": s_geom_d}]}, dup_geo_f)
+            json.dump(
+                {"type": "INVALID", "features": [{"geometry": s_geom_d}]}, dup_geo_f
+            )
 
         geom_data = moving_slide.warp_geojson(dup_geo)
 
