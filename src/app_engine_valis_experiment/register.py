@@ -95,6 +95,6 @@ def register(data: InputData):
         deformed = tmp_dst / "deformed_moving.ome.tiff"
         moving_slide.warp_and_save_slide(str(deformed))
 
-        shutil.copy(deformed, o_dir / deformed.with_suffix(""))
+        shutil.copy(deformed, o_dir / "deformed_moving")
 
     registration.kill_jvm()
