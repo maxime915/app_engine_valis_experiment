@@ -10,7 +10,7 @@ from .io_utils import InputData, get_io_dirs
 
 
 # FIX: otherwise PIL refuses to open certain large image files
-Image.MAX_IMAGE_PIXELS = 16 * int(1024 * 1024 * 1024 // 4 // 3)
+Image.MAX_IMAGE_PIXELS = 15 * 16 * int(1024 * 1024 * 1024 // 4 // 3)
 
 
 def _name_with_ext(path: Path):
