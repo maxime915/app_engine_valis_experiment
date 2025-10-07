@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1.8
 
-FROM cdgatenbee/valis-wsi:1.0.4
+FROM cdgatenbee/valis-wsi:1.1.0
+
+RUN apt -y update && apt -y install libvips
 
 WORKDIR /app
 
