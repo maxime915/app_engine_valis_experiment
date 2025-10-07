@@ -1,6 +1,6 @@
 name: VALIS experiment
 name_short: app_engine_valis_exp
-version: 0.1.0
+version: 0.1.1
 namespace: be.cytomine.research.exp.valis
 $schema: https://cytomine.com/schema-store/tasks/task.v0.json
 authors:
@@ -14,16 +14,16 @@ configuration:
   input_folder: /inputs
   output_folder: /outputs
   image:
-    file: /image.tar
+    file: /app_engine_valis_exp-0.1.1.tar
 
 inputs:
   fixed_image:
     display_name: Fixed Image
-    type: image
+    type: wsi 
     description: Image that remains fixed during the registration
   moving_image:
     display_name: Moving Image
-    type: image
+    type: wsi
     description: Image that moves during the registration
   geometry_moving:
     display_name: Geometry on Moving Image
@@ -53,7 +53,7 @@ inputs:
 outputs:
   deformed_moving:
     display_name: Deformed Moving Image
-    type: image
+    type: wsi
     description: Moving image deformed to match the fixed image
     dependencies:
       derived_from: inputs/moving_image
