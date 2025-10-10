@@ -1,55 +1,62 @@
 name: VALIS experiment
 name_short: app_engine_valis_exp
-version: 0.1.1
+version: 0.1.2
 namespace: be.cytomine.research.exp.valis
 $schema: https://cytomine.com/schema-store/tasks/task.v0.json
 authors:
-  - first_name: Maxime
-    last_name: Amodei
-    organization: ULiege
-    email: maxime.amodei@uliege.be
-    is_contact: true
-
+- first_name: Maxime
+  last_name: Amodei
+  organization: ULiege
+  email: maxime.amodei@uliege.be
+  is_contact: true
 configuration:
   input_folder: /inputs
   output_folder: /outputs
   image:
-    file: /app_engine_valis_exp-0.1.1.tar
-
+    file: /app_engine_valis_exp-0.1.2.tar
 inputs:
   fixed_image:
     display_name: Fixed Image
-    type: wsi 
+    type: image
     description: Image that remains fixed during the registration
   moving_image:
     display_name: Moving Image
-    type: wsi
+    type: image
     description: Image that moves during the registration
   geometry_moving:
     display_name: Geometry on Moving Image
     type: geometry
-    description: Geometry that will be transformed from the moving image to the fixed image
+    description: Geometry that will be transformed from the moving image to the fixed
+      image
   crop:
     display_name: Cropping Mode
     type:
       id: enumeration
-      values: ["reference", "all", "overlap"]
+      values:
+      - reference
+      - all
+      - overlap
     description: The region to consider for the registration. "all" is recommended
   registration_type:
     display_name: Registration Type
     type:
       id: enumeration
-      values: ["rigid", "non-rigid", "micro"]
-    description: The type of registration (rigid, non-rigid at low resolution, non-rigid at high resolution)
+      values:
+      - rigid
+      - non-rigid
+      - micro
+    description: The type of registration (rigid, non-rigid at low resolution, non-rigid
+      at high resolution)
   max_proc_size:
     display_name: Low Resolution
     type: number
-    description: The resolution on which the rigid and non-rigid registrations are performed
+    description: The resolution on which the rigid and non-rigid registrations are
+      performed
   micro_max_proc_size:
     display_name: High Resolution
     type: number
-    description: The resolution on which the micro registration is performed. Must be given even if registration_type is not micro.
-
+    description: The resolution on which the micro registration is performed. Must
+      be given even if registration_type is not micro.
 outputs:
   deformed_moving:
     display_name: Deformed Moving Image
@@ -63,3 +70,4 @@ outputs:
     description: Mapping from geometry_moving to the deformed image
     dependencies:
       derived_from: inputs/geometry_moving
+
