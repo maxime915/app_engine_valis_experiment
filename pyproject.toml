@@ -17,6 +17,10 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 dependencies = [
+    "openslide-bin>=4.0.0.8",
+    "openslide-python>=1.4.2",
+    "pyvips[binary]>=3.0.0",
+    "valis-wsi>=1.2.0",
 ]
 
 [tool.hatch.build]
