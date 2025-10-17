@@ -2,8 +2,6 @@
 
 FROM cdgatenbee/valis-wsi:1.2.0@sha256:4fd20b687ae0f08c47011753bc5083dca5ac65a454d3615589eddf6b14e3c419
 
-RUN apt -y update && apt -y install libvips
-
 WORKDIR /app
 
 COPY pyproject.toml LICENSE README.md /app/

@@ -49,18 +49,18 @@ inputs:
       at high resolution)
   max_proc_size:
     display_name: Low Resolution
-    type: number
+    type: integer
     description: The resolution on which the rigid and non-rigid registrations are
       performed
   micro_max_proc_size:
     display_name: High Resolution
-    type: number
+    type: integer
     description: The resolution on which the micro registration is performed. Must
       be given even if registration_type is not micro.
 outputs:
   deformed_moving:
     display_name: Deformed Moving Image
-    type: wsi
+    type: image
     description: Moving image deformed to match the fixed image
     dependencies:
       derived_from: inputs/moving_image
