@@ -70,4 +70,11 @@ outputs:
     description: Mapping from geometry_moving to the deformed image
     dependencies:
       derived_from: inputs/geometry_moving
-
+  valis_stdout:
+    display_name: VALIS log (out)
+    type: file
+    description: stdout from the registration using VALIS
+  valis_stderr:
+    display_name: VALIS log (err)
+    type: file
+    description: stderr from the registration using VALIS
