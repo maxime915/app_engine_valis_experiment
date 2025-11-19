@@ -1,6 +1,6 @@
 name: VALIS experiment
 name_short: app_engine_valis_exp
-version: 0.1.2
+version: 0.1.4
 namespace: be.cytomine.research.exp.valis
 $schema: https://cytomine.com/schema-store/tasks/task.v0.json
 authors:
@@ -13,7 +13,7 @@ configuration:
   input_folder: /inputs
   output_folder: /outputs
   image:
-    file: /app_engine_valis_exp-0.1.2.tar
+    file: /app_engine_valis_exp-0.1.4.tar
 inputs:
   fixed_image:
     display_name: Fixed Image
