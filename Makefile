@@ -7,7 +7,7 @@ zip:	app_engine_valis_exp-$(VERSION).tar descriptor
 
 tmp_descriptor := descriptor.yaml.tmp
 descriptor: pyproject.toml
-	python3 -c 'import yaml;f=open("descriptor.yaml");y=yaml.safe_load(f);y["configuration"]["image"]["file"] = "/app_engine_valis_exp-$(VERSION).tar";y["version"] = "$(VERSION)"; print(yaml.dump(y, default_flow_style=False, sort_keys=False))' > $(tmp_descriptor)
+	python3 -c 'import yaml;f=open("descriptor.yaml");y=yaml.safe_load(f);y["configuration"]["image"]["file"] = "/app_engine_valis_exp-$(VERSION).tar";y["version"] = "$(VERSION)"; print(yaml.dump(y, default_flow_style=False, sort_keys=False), end="")' > $(tmp_descriptor)
 	mv $(tmp_descriptor) descriptor.yaml
 
 app_engine_valis_exp-$(VERSION).tar: $(SRCS) $(CFGS)
