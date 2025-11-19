@@ -63,6 +63,10 @@ def register(data: InputData):
                 else registration.DEFAULT_NON_RIGID_CLASS
             ),  # type: ignore
         )
+        if not hasattr(registrar, "rigid_reg_kwargs"):
+            registrar.rigid_reg_kwargs = {}
+        if not hasattr(registrar, "non_rigid_reg_kwargs"):
+            registrar.non_rigid_reg_kwargs = {}
         _ = registrar.register()
 
         if data.registration_type == "micro":
