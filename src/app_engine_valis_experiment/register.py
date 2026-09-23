@@ -43,15 +43,17 @@ def register(data: InputData):
         #   since only PNG/JPEG/TIFF are supported right now, we can rename them
 
         # image copy for valis
-        shutil.copy(data.fixed_image, tmp_src / _name_with_ext(data.fixed_image))
-        shutil.copy(data.moving_image, tmp_src / _name_with_ext(data.moving_image))
+        fixed_name = _name_with_ext(data.fixed_image)
+        moving_name = _name_with_ext(data.moving_image)
+        shutil.copy(data.fixed_image, tmp_src / fixed_name)
+        shutil.copy(data.moving_image, tmp_src / moving_name)
 
         # start valis with default options
         registrar = registration.Valis(
             src_dir=str(tmp_src),
             dst_dir=str(tmp_dst),
             name="main",  # useless -> each container will only see one job
-            reference_img_f=data.fixed_image.name,
+            reference_img_f=fixed_name,
             align_to_reference=True,
             crop=data.crop,
             max_image_dim_px=data.max_proc_size,
@@ -73,7 +75,7 @@ def register(data: InputData):
             registrar.register_micro(max_non_rigid_registration_dim_px=data.micro_max_proc_size)
 
         moving_slide: registration.Slide = registrar.get_slide(
-            data.moving_image.name
+            moving_name
         )  # type:ignore
 
         with open(data.geometry_moving, "r", encoding="utf8") as s_geom_f:

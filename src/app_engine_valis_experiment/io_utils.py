@@ -65,10 +65,6 @@ def read_parameter(input_dir: pathlib.Path, key: str):
 def find_inputs():
     dir_i, _ = get_io_dirs()
 
-    # TODO
-    #   - extension was removed, but only png, jpeg and tiff are present
-    # for now, hope that VALIS will guess it right...
-
     fixed_image = dir_i / "fixed_image"
     _expect(fixed_image, "file")
     moving_image = dir_i / "moving_image"
