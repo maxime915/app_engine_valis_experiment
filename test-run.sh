@@ -4,7 +4,7 @@ set -euo pipefail
 
 IDIR="./test-inputs"
 ODIR="./test-outputs"
-TAG="app-engine-valis-exp"
+TAG="$1"
 
 if [ ! -d $IDIR ]; then
     mkdir $IDIR

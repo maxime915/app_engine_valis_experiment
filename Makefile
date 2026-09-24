@@ -3,7 +3,9 @@ SRCS := $(shell find src -type f)
 CFGS := pyproject.toml Dockerfile LICENSE Makefile README.md script.py
 
 zip:	app_engine_valis_exp-$(VERSION).tar descriptor
-	zip app_engine_valis_exp.zip descriptor.yaml app_engine_valis_exp-$(VERSION).tar
+	rm -f app_engine_valis_exp.zip
+	pigz -K -p $(shell nproc) -c app_engine_valis_exp-$(VERSION).tar > app_engine_valis_exp.zip
+	zip app_engine_valis_exp.zip descriptor.yaml
 
 tmp_descriptor := descriptor.yaml.tmp
 descriptor: pyproject.toml
