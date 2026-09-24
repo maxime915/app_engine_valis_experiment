@@ -1,0 +1,20 @@
+.git
+.gitignore
+.venv
+.mypy_cache
+.vscode
+.dockerignore
+
+# build artifacts
+*.tar
+*.zip
+descriptor.yaml
+descriptor.yaml.tmp
+
+# local test data
+data
+test-inputs
+test-outputs
+
+# misc
+notes.md
