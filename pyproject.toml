@@ -17,6 +17,8 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 dependencies = [
+    "valis-wsi==1.2.0",
+    "pydantic>=2.0",
 ]
 
 [tool.hatch.build]
