@@ -9,14 +9,14 @@ PIGZ := $(shell command -v pigz 2>/dev/null)
 
 zip: $(NAME).zip
 
-$(NAME).zip:	descriptor $(NAME)-$(VERSION).tar
+$(NAME).zip:	descriptor logo.png $(NAME)-$(VERSION).tar
 ifdef PIGZ
 	rm -f $(NAME).zip
 	pigz -K -p $(shell nproc) -c $(NAME)-$(VERSION).tar > $(NAME).zip
-	zip $(NAME).zip descriptor.yaml
+	zip $(NAME).zip descriptor.yaml logo.png
 else
 	rm -f $(NAME).zip
-	zip $(NAME).zip $(NAME)-$(VERSION).tar descriptor.yaml
+	zip $(NAME).zip $(NAME)-$(VERSION).tar descriptor.yaml logo.png
 endif
 
 descriptor:

@@ -36,6 +36,8 @@ This will:
 2. Build the Docker image described by the `Dockerfile`.
 3. Save it as `app_engine_valis_exp-<version>.tar`.
 4. Produce `app_engine_valis_exp.zip`, ready to be uploaded to Cytomine.
+   The archive also contains `logo.png`, which Cytomine displays as the
+   task's icon.
 
 > To publish a new task version, bump `version` and `configuration.image.file`
 > in `descriptor.yaml` before rebuilding.
