@@ -21,7 +21,10 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     HOME=/root \
-    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    TORCH_HOME=/opt/torch \
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+    VIRTUAL_ENV=/app/.venv \
+    PATH=/app/.venv/bin:$PATH
 
 WORKDIR /build
 
@@ -32,6 +35,9 @@ RUN apt-get update \
         libvips42 \
         openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
+
+# venvs are not relocatable: create it at its final path in the runtime image.
+RUN python3 -m venv /app/.venv
 
 # CPU-only pytorch/torchvision wheels first, so installing valis-wsi
 # afterwards is satisfied by them instead of pulling GPU builds from PyPI.
@@ -46,7 +52,11 @@ RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu .
 
 # Bio-Formats jar is expected next to the valis package itself.
 RUN wget -q "https://downloads.openmicroscopy.org/bio-formats/${BF_VERSION}/artifacts/bioformats_package.jar" \
-    -O /usr/local/lib/python3.11/site-packages/valis/bioformats_package.jar
+    -O /app/.venv/lib/python3.11/site-packages/valis/bioformats_package.jar
+
+# valis rewrites valis/data/bf_formats.txt every time the JVM starts, and the
+# pod runs as an unknown non-root user.
+RUN chmod -R a+rwx /app/.venv/lib/python3.11/site-packages/valis/data
 
 # Pre-download pytorch model weights so the runtime image works offline.
 COPY docker/download_weights.py /build/download_weights.py
@@ -64,14 +74,22 @@ RUN apt-get update \
         openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
+# The cluster runs the container as an arbitrary non-root user that cannot
+# write outside /app and /tmp: weights live in a world-readable location and
+# every runtime cache/config (matplotlib, fontconfig, jgo, ...) goes to /tmp.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    HOME=/root \
-    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    HOME=/tmp \
+    XDG_CACHE_HOME=/tmp/.cache \
+    XDG_CONFIG_HOME=/tmp/.config \
+    MPLCONFIGDIR=/tmp/matplotlib \
+    TORCH_HOME=/opt/torch \
+    JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+    VIRTUAL_ENV=/app/.venv \
+    PATH=/app/.venv/bin:$PATH
 
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /root/.cache/torch /root/.cache/torch
+COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder --chmod=a+rX /opt/torch /opt/torch
 
 WORKDIR /app
 COPY script.py /app/script.py
