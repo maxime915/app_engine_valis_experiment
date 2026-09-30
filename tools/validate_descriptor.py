@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "jsonschema",
+#     "pyyaml",
+# ]
+# ///
 "validate a task descriptor (YAML) against a JSON schema file"
 
 import json

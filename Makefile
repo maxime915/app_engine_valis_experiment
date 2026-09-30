@@ -9,7 +9,6 @@ PIGZ := $(shell command -v pigz 2>/dev/null)
 # JSON schema referenced by the descriptor, cached locally (keyed by URL)
 SCHEMA_URL := $(shell sed -n 's/^\$$schema:[[:space:]]*//p' descriptor.yaml)
 SCHEMA_CACHE := .cache/schema-$(shell printf '%s' '$(SCHEMA_URL)' | md5sum | cut -c1-12).json
-VALIDATE_PY := uv run --no-project -q --with jsonschema --with pyyaml python
 
 
 zip: $(NAME).zip
@@ -25,7 +24,7 @@ else
 endif
 
 descriptor: $(SCHEMA_CACHE)
-	@$(VALIDATE_PY) tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE)
+	@uv run -q tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE)
 	@test "$(IMAGE_FILE)" = "/$(NAME)-$(VERSION).tar" || \
 		{ echo "descriptor.yaml: image file is '$(IMAGE_FILE)', expected '/$(NAME)-$(VERSION).tar'" >&2; exit 1; }
 	@echo "descriptor.yaml: valid"
