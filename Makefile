@@ -24,13 +24,11 @@ else
 	zip $(NAME).zip $(NAME)-$(VERSION).tar descriptor.yaml logo.png
 endif
 
-descriptor: validate
+descriptor: $(SCHEMA_CACHE)
+	@$(VALIDATE_PY) tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE)
 	@test "$(IMAGE_FILE)" = "/$(NAME)-$(VERSION).tar" || \
 		{ echo "descriptor.yaml: image file is '$(IMAGE_FILE)', expected '/$(NAME)-$(VERSION).tar'" >&2; exit 1; }
-
-validate: $(SCHEMA_CACHE)
-	@$(VALIDATE_PY) tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE)
-	@echo "descriptor.yaml: valid against $(SCHEMA_URL)"
+	@echo "descriptor.yaml: valid"
 
 $(SCHEMA_CACHE):
 	@test -n "$(SCHEMA_URL)" || { echo "descriptor.yaml: missing \$$schema" >&2; exit 1; }
@@ -41,4 +39,4 @@ $(NAME)-$(VERSION).tar: $(SRCS) $(CFGS)
 	docker build -t app-engine-valis-exp:$(VERSION) -f Dockerfile .
 	docker save app-engine-valis-exp:$(VERSION) -o $(NAME)-$(VERSION).tar
 
-.PHONY: zip descriptor validate
+.PHONY: zip descriptor

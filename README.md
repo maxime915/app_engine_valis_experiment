@@ -34,13 +34,13 @@ This will:
 
 1. Validate `descriptor.yaml` against the JSON schema referenced by its
    `$schema` field. The schema is downloaded once and cached in `.cache/`
-   (delete that folder to fetch it again). This step alone can be run with
-   `make validate`.
-2. Check that `configuration.image.file` in `descriptor.yaml` matches
-   `/<name_short>-<version>.tar` (both read from `descriptor.yaml`).
-3. Build the Docker image described by the `Dockerfile`.
-4. Save it as `app_engine_valis_exp-<version>.tar`.
-5. Produce `app_engine_valis_exp.zip`, ready to be uploaded to Cytomine.
+   (delete that folder to fetch it again). It also checks that
+   `configuration.image.file` matches `/<name_short>-<version>.tar` (both
+   read from `descriptor.yaml`). This step alone can be run with
+   `make descriptor`.
+2. Build the Docker image described by the `Dockerfile`.
+3. Save it as `app_engine_valis_exp-<version>.tar`.
+4. Produce `app_engine_valis_exp.zip`, ready to be uploaded to Cytomine.
    The archive also contains `logo.png`, which Cytomine displays as the
    task's icon.
 
