@@ -1,6 +1,6 @@
 name: VALIS experiment
 name_short: app_engine_valis_exp
-version: 0.1.7
+version: 0.1.8
 namespace: be.cytomine.research.exp.valis
 #$schema: https://cytomine.com/schema-store/tasks/task.v0.json
 $schema: https://raw.githubusercontent.com/cytomine/cytomine/refs/heads/main/app-engine/src/main/resources/schemas/tasks/task.v0.json
@@ -21,7 +21,7 @@ configuration:
   input_folder: /inputs
   output_folder: /outputs
   image:
-    file: /app_engine_valis_exp-0.1.7.tar
+    file: /app_engine_valis_exp-0.1.8.tar
   resources:
     ram: 8Gi
     cpus: 2
