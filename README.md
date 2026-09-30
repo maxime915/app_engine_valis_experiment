@@ -34,7 +34,9 @@ This will:
 
 1. Validate `descriptor.yaml` against the JSON schema referenced by its
    `$schema` field. The schema is downloaded once and cached in `.cache/`
-   (delete that folder to fetch it again). It also checks that
+   (delete that folder to fetch it again). Validation is strict: keys that
+   the schema does not declare (e.g. a typo such as `cpu` instead of `cpus`)
+   are rejected, except `name_short`, used by the Makefile. It also checks that
    `configuration.image.file` matches `/<name_short>-<version>.tar` (both
    read from `descriptor.yaml`). This step alone can be run with
    `make descriptor`.

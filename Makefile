@@ -24,7 +24,7 @@ else
 endif
 
 descriptor: $(SCHEMA_CACHE)
-	@uv run -q tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE)
+	@uv run -q tools/validate_descriptor.py descriptor.yaml $(SCHEMA_CACHE) --strict --allow name_short
 	@test "$(IMAGE_FILE)" = "/$(NAME)-$(VERSION).tar" || \
 		{ echo "descriptor.yaml: image file is '$(IMAGE_FILE)', expected '/$(NAME)-$(VERSION).tar'" >&2; exit 1; }
 	@echo "descriptor.yaml: valid"
