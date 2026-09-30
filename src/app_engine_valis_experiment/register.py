@@ -1,16 +1,15 @@
 import json
 import shutil
 from pathlib import Path
-from PIL import Image
 from tempfile import TemporaryDirectory
 
+from PIL import Image
 from valis import registration
 
 from .io_utils import InputData, get_io_dirs
 
-
 # FIX: otherwise PIL refuses to open certain large image files
-Image.MAX_IMAGE_PIXELS = 15 * 16 * int(1024 * 1024 * 1024 // 4 // 3)
+Image.MAX_IMAGE_PIXELS = 15 * 16 * (1024 * 1024 * 1024 // 4 // 3)
 
 
 def _name_with_ext(path: Path):
@@ -24,6 +23,45 @@ def _name_with_ext(path: Path):
             case "TIFF":
                 return path.with_suffix(".tiff").name
         raise ValueError(f"{img.format=!r} is not supported")
+
+
+def _write_geometry(path: Path, warped: dict):
+    "map back from the VALIS feature collection to a single GeoJSON geometry"
+    with open(path, "x", encoding="utf8") as out_geom_f:
+        json.dump(warped["features"][0]["geometry"], out_geom_f)
+
+
+def _warp_geometry(
+    data: InputData,
+    work_dir: Path,
+    o_dir: Path,
+    moving_slide: registration.Slide,
+    fixed_slide: registration.Slide,
+):
+    assert data.geometry_moving is not None
+    with open(data.geometry_moving, "r", encoding="utf8") as s_geom_f:
+        s_geom_d = json.load(s_geom_f)
+
+    # VALIS expects a feature collection rather than a bare geometry
+    dup_geo = work_dir / "tmp-geo.json"
+    with open(dup_geo, "x", encoding="utf8") as dup_geo_f:
+        json.dump({"type": "INVALID", "features": [{"geometry": s_geom_d}]}, dup_geo_f)
+
+    # registration space: matches the deformed moving image
+    _write_geometry(
+        o_dir / "deformed_geometry_registration",
+        moving_slide.warp_geojson(str(dup_geo)),
+    )
+
+    # coordinate space of the (unwarped) fixed image
+    _write_geometry(
+        o_dir / "deformed_geometry_fixed",
+        moving_slide.warp_geojson_from_to(
+            str(dup_geo),
+            fixed_slide,
+            non_rigid=data.registration_type != "rigid",
+        ),
+    )
 
 
 def register(data: InputData):
@@ -72,30 +110,16 @@ def register(data: InputData):
         _ = registrar.register()
 
         if data.registration_type == "micro":
-            registrar.register_micro(max_non_rigid_registration_dim_px=data.micro_max_proc_size)
-
-        moving_slide: registration.Slide = registrar.get_slide(
-            moving_name
-        )  # type:ignore
-
-        with open(data.geometry_moving, "r", encoding="utf8") as s_geom_f:
-            s_geom_d = json.load(s_geom_f)
-
-        # VALIS expects a different format for GEOJSON
-        dup_geo = work_dir / "tmp-geo.json"
-        with open(dup_geo, "x", encoding="utf8") as dup_geo_f:
-            json.dump(
-                {"type": "INVALID", "features": [{"geometry": s_geom_d}]}, dup_geo_f
+            assert data.micro_max_proc_size is not None
+            registrar.register_micro(
+                max_non_rigid_registration_dim_px=data.micro_max_proc_size
             )
 
-        geom_data = moving_slide.warp_geojson(dup_geo)
+        moving_slide: registration.Slide = registrar.get_slide(moving_name)  # type:ignore
+        fixed_slide: registration.Slide = registrar.get_slide(fixed_name)  # type:ignore
 
-        # map back to the original GEOJSON format
-        geom_data = geom_data["features"][0]["geometry"]
-
-        # dump the warped geometry
-        with open(o_dir / "deformed_geometry", "x", encoding="utf8") as out_geom_f:
-            json.dump(geom_data, out_geom_f)
+        if data.geometry_moving is not None:
+            _warp_geometry(data, work_dir, o_dir, moving_slide, fixed_slide)
 
         # warp image
         deformed = tmp_dst / "deformed_moving.ome.tiff"

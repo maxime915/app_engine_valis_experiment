@@ -31,14 +31,14 @@ make zip
 
 This will:
 
-1. Build the Docker image described by the `Dockerfile`.
-2. Save it as `app_engine_valis_exp-<version>.tar` (version read from
-   `pyproject.toml`).
-3. Regenerate `descriptor.yaml` with the matching version and image file name.
+1. Check that `configuration.image.file` in `descriptor.yaml` matches
+   `/<name_short>-<version>.tar` (both read from `descriptor.yaml`).
+2. Build the Docker image described by the `Dockerfile`.
+3. Save it as `app_engine_valis_exp-<version>.tar`.
 4. Produce `app_engine_valis_exp.zip`, ready to be uploaded to Cytomine.
 
-> The version is controlled by the `version` field in `pyproject.toml`; bump
-> it there before rebuilding to publish a new task version.
+> To publish a new task version, bump `version` and `configuration.image.file`
+> in `descriptor.yaml` before rebuilding.
 
 ## Uploading the app to Cytomine
 
@@ -67,11 +67,11 @@ Cytomine project.
 |---|---|---|
 | **Fixed Image** | image | The reference image. It stays unchanged; the moving image is aligned onto it. |
 | **Moving Image** | image | The image that will be deformed/aligned to match the fixed image. |
-| **Geometry on Moving Image** | geometry | An annotation/geometry (GeoJSON) drawn on the moving image. It is warped through the same transform computed for the moving image, so it ends up in fixed-image coordinates. |
-| **Cropping Mode** | enumeration: `reference`, `all`, `overlap` | Which region of the images is kept/considered for registration. `reference` crops to the fixed image's content, `overlap` keeps only the area common to both images after alignment, `all` keeps the union of both images. **`all` is recommended** in most cases since it avoids losing image content. |
-| **Registration Type** | enumeration: `rigid`, `non-rigid`, `micro` | The registration algorithm to run. `rigid` only estimates translation/rotation/scale. `non-rigid` additionally performs a non-rigid (deformable) registration at low resolution. `micro` performs an additional non-rigid registration pass at high resolution, refining the result of `non-rigid` (it always runs the low-resolution steps first). |
-| **Low Resolution** | integer | The maximum image dimension (in pixels) used while computing the rigid and non-rigid registrations. Larger values give more precise alignment but take longer and use more memory. A common starting value is around `850`. |
-| **High Resolution** | integer | The maximum image dimension (in pixels) used for the `micro` registration pass. Must be provided even when Registration Type is not `micro` (it is simply ignored in that case), and must be **greater than or equal to** Low Resolution. |
+| **Geometry on Moving Image** | geometry | An annotation/geometry (GeoJSON) drawn on the moving image. **Optional**: if omitted, no geometry output is produced. Otherwise it is warped both into the registration space and onto the fixed image (see outputs). |
+| **Cropping Mode** | enumeration: `reference`, `all`, `overlap` (default `all`) | Which region of the images is kept/considered for registration. `reference` crops to the fixed image's content, `overlap` keeps only the area common to both images after alignment, `all` keeps the union of both images. **`all` is recommended** in most cases since it avoids losing image content. |
+| **Registration Type** | enumeration: `rigid`, `non-rigid`, `micro` (default `non-rigid`) | The registration algorithm to run. `rigid` only estimates translation/rotation/scale. `non-rigid` additionally performs a non-rigid (deformable) registration at low resolution. `micro` performs an additional non-rigid registration pass at high resolution, refining the result of `non-rigid` (it always runs the low-resolution steps first). |
+| **Low Resolution** | integer ≥ 100 (default `850`) | The maximum image dimension (in pixels) used while computing the rigid and non-rigid registrations. Larger values give more precise alignment but take longer and use more memory. Must not exceed High Resolution when the latter is given. |
+| **High Resolution** | integer ≥ 100 (default `3000`) | The maximum image dimension (in pixels) used for the `micro` registration pass. **Optional**, but required when Registration Type is `micro` (ignored otherwise). When given, must be **greater than or equal to** Low Resolution. |
 
 > 📷 *Suggested screenshot: the task's parameter form in Cytomine, showing
 > the image pickers and the enumeration/integer fields described above.*
@@ -81,7 +81,8 @@ Cytomine project.
 | Output | Type | Description |
 |---|---|---|
 | **Deformed Moving Image** | image | The moving image after being warped to align with the fixed image. |
-| **Deformed Geometry** | geometry | The input geometry, warped into the coordinate space of the fixed/deformed image. |
+| **Deformed Geometry (Fixed Image)** | geometry | The input geometry mapped onto the (unwarped) fixed image's coordinates, attached to the fixed image. Only produced if a geometry is given. |
+| **Deformed Geometry (Registration Space)** | geometry | The input geometry warped into the registration space, i.e. the coordinates of the Deformed Moving Image. With `crop: all`/`overlap` this space is padded/cropped and differs from the fixed image. Only produced if a geometry is given. |
 | **VALIS log (out)** | file | Captured standard output from the VALIS registration run. Useful to inspect matching quality/statistics. |
 | **VALIS log (err)** | file | Captured standard error from the VALIS registration run. Check this first if a run fails or produces unexpected results. |
 
@@ -110,7 +111,8 @@ Cytomine project.
   need (e.g. `3000` or more) but drives most of the runtime/memory cost when
   `registration_type: micro` is used.
 - Only PNG, JPEG and TIFF image formats are supported as inputs (this is a
-  VALIS limitation); other formats will cause the task to fail.
+  VALIS limitation); the task declares these formats so other images are
+  rejected before running.
 
 ### Troubleshooting
 

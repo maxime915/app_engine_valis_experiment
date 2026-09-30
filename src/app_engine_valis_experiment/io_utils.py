@@ -7,26 +7,23 @@ import pydantic
 class InputData(pydantic.BaseModel):
     fixed_image: pathlib.Path
     moving_image: pathlib.Path
-    geometry_moving: pathlib.Path
+    geometry_moving: pathlib.Path | None = None
     crop: Literal["reference", "all", "overlap"]
     registration_type: Literal["rigid", "non-rigid", "micro"]
-    max_proc_size: int  # 850
-    micro_max_proc_size: int  # 3000
+    max_proc_size: int = pydantic.Field(ge=100)
+    micro_max_proc_size: int | None = pydantic.Field(default=None, ge=100)
 
-    @pydantic.root_validator(pre=True)
-    def check_fields(cls, values):
-        proc, micro = values.get("max_proc_size"), values.get("micro_max_proc_size")
-        if proc < 100:
-            raise ValueError(f"max_proc_size={proc} < 100")
-        if micro < 100:
-            raise ValueError(f"micro_max_proc_size={micro} < 100")
-
-        if proc > micro:
+    @pydantic.model_validator(mode="after")
+    def check_fields(self):
+        proc, micro = self.max_proc_size, self.micro_max_proc_size
+        if self.registration_type == "micro" and micro is None:
+            raise ValueError("micro_max_proc_size is required for micro registration")
+        if micro is not None and proc > micro:
             raise ValueError(
                 f"max_proc_size={proc} should not be higher "
                 f"than micro_max_proc_size={micro}"
             )
-        return values
+        return self
 
 
 def _expect(path: pathlib.Path, kind: Literal["dir", "file", "any"]):
@@ -62,6 +59,12 @@ def read_parameter(input_dir: pathlib.Path, key: str):
         return param_file.read().strip()
 
 
+def read_optional_parameter(input_dir: pathlib.Path, key: str):
+    if not (input_dir / key).is_file():
+        return None
+    return read_parameter(input_dir, key)
+
+
 def find_inputs():
     dir_i, _ = get_io_dirs()
 
@@ -70,7 +73,10 @@ def find_inputs():
     moving_image = dir_i / "moving_image"
     _expect(moving_image, "file")
     geometry_moving = dir_i / "geometry_moving"
-    _expect(geometry_moving, "file")
+    if not geometry_moving.is_file():
+        geometry_moving = None
+
+    micro_max_proc_size = read_optional_parameter(dir_i, "micro_max_proc_size")
 
     return InputData(
         fixed_image=fixed_image,
@@ -79,5 +85,7 @@ def find_inputs():
         crop=read_parameter(dir_i, "crop"),  # type: ignore
         registration_type=read_parameter(dir_i, "registration_type"),  # type: ignore
         max_proc_size=int(read_parameter(dir_i, "max_proc_size")),
-        micro_max_proc_size=int(read_parameter(dir_i, "micro_max_proc_size")),
+        micro_max_proc_size=(
+            None if not micro_max_proc_size else int(micro_max_proc_size)
+        ),
     )

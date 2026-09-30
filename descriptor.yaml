@@ -4,6 +4,13 @@ version: 0.1.7
 namespace: be.cytomine.research.exp.valis
 #$schema: https://cytomine.com/schema-store/tasks/task.v0.json
 $schema: https://raw.githubusercontent.com/cytomine/cytomine/refs/heads/main/app-engine/src/main/resources/schemas/tasks/task.v0.json
+description: >-
+  Register (align) a moving whole-slide image onto a fixed one using VALIS
+  (rigid, non-rigid or micro registration), and warp a geometry drawn on the
+  moving image both into the registration space (the deformed moving image)
+  and into the fixed image.
+external:
+  source_code: https://github.com/maxime915/app_engine_valis_experiment
 authors:
 - first_name: Maxime
   last_name: Amodei
@@ -21,17 +28,22 @@ configuration:
 inputs:
   fixed_image:
     display_name: Fixed Image
-    type: image
+    type:
+      id: image
+      formats: [png, jpeg, tiff]
     description: Image that remains fixed during the registration
   moving_image:
     display_name: Moving Image
-    type: image
+    type:
+      id: image
+      formats: [png, jpeg, tiff]
     description: Image that moves during the registration
   geometry_moving:
     display_name: Geometry on Moving Image
     type: geometry
-    description: Geometry that will be transformed from the moving image to the fixed
-      image
+    optional: true
+    description: Geometry on the moving image to warp. If omitted, no geometry
+      output is produced.
   crop:
     display_name: Cropping Mode
     type:
@@ -40,6 +52,7 @@ inputs:
       - reference
       - all
       - overlap
+    default: all
     description: The region to consider for the registration. "all" is recommended
   registration_type:
     display_name: Registration Type
@@ -49,18 +62,27 @@ inputs:
       - rigid
       - non-rigid
       - micro
+    default: non-rigid
     description: The type of registration (rigid, non-rigid at low resolution, non-rigid
       at high resolution)
   max_proc_size:
     display_name: Low Resolution
-    type: integer
+    type:
+      id: integer
+      geq: 100
+    default: 850
     description: The resolution on which the rigid and non-rigid registrations are
-      performed
+      performed. Must not exceed High Resolution.
   micro_max_proc_size:
     display_name: High Resolution
-    type: integer
-    description: The resolution on which the micro registration is performed. Must
-      be given even if registration_type is not micro.
+    type:
+      id: integer
+      geq: 100
+    default: 3000
+    optional: true
+    description: The resolution on which the micro registration is performed. Only
+      used (and then required) when registration_type is micro. Must not be lower
+      than Low Resolution.
 outputs:
   deformed_moving:
     display_name: Deformed Moving Image
@@ -68,17 +90,30 @@ outputs:
     description: Moving image deformed to match the fixed image
     dependencies:
       derived_from: inputs/moving_image
-  deformed_geometry:
-    display_name: Deformed Geometry
+  deformed_geometry_fixed:
+    display_name: Deformed Geometry (Fixed Image)
     type: geometry
-    description: Mapping from geometry_moving to the deformed image
+    optional: true
+    description: geometry_moving mapped onto the fixed image coordinates. Only
+      produced if geometry_moving is given.
     dependencies:
-      derived_from: inputs/geometry_moving
+      derived_from: inputs/fixed_image
+  deformed_geometry_registration:
+    display_name: Deformed Geometry (Registration Space)
+    type: geometry
+    optional: true
+    description: geometry_moving warped into the registration space, i.e. the
+      coordinates of the Deformed Moving Image. Only produced if geometry_moving
+      is given.
   valis_stdout:
     display_name: VALIS log (out)
-    type: file
+    type:
+      id: file
+      formats: [text]
     description: stdout from the registration using VALIS
   valis_stderr:
     display_name: VALIS log (err)
-    type: file
+    type:
+      id: file
+      formats: [text]
     description: stderr from the registration using VALIS
