@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 import sys
@@ -27,10 +28,26 @@ def replace_out_err(out_path: pathlib.Path, err_path: pathlib.Path):
             os.close(bkp_out)
             os.close(bkp_err)
 
+def make_logger(stream) -> logging.Logger:
+    logger = logging.getLogger("valis_app")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(message)s", "%Y-%m-%d %H:%M:%S")
+    )
+    logger.addHandler(handler)
+    return logger
+
+
+# keep a handle on the real stderr before fd 2 is redirected to a file
+true_stderr = os.fdopen(os.dup(2), "w", buffering=1, encoding="utf8")
+logger = make_logger(true_stderr)
+
 with replace_out_err(
     pathlib.Path("/outputs/valis_stdout"), pathlib.Path("/outputs/valis_stderr")
 ):
     from app_engine_valis_experiment.io_utils import find_inputs
     from app_engine_valis_experiment.register import register
 
-    register(find_inputs())
+    register(find_inputs(), logger)
