@@ -26,25 +26,25 @@ configuration:
     ram: 8Gi
     cpus: 2
 inputs:
-  fixed_image:
+  a_fixed_image:
     display_name: Fixed Image
     type:
       id: image
       formats: [png, jpeg, tiff]
     description: Image that remains fixed during the registration
-  moving_image:
+  b_moving_image:
     display_name: Moving Image
     type:
       id: image
       formats: [png, jpeg, tiff]
     description: Image that moves during the registration
-  geometry_moving:
+  c_geometry_moving:
     display_name: Geometry on Moving Image
     type: geometry
     optional: true
     description: Geometry on the moving image to warp. If omitted, no geometry
       output is produced.
-  crop:
+  d_crop:
     display_name: Cropping Mode
     type:
       id: enumeration
@@ -54,7 +54,7 @@ inputs:
       - overlap
     default: all
     description: The region to consider for the registration. "all" is recommended
-  registration_type:
+  e_registration_type:
     display_name: Registration Type
     type:
       id: enumeration
@@ -65,7 +65,7 @@ inputs:
     default: non-rigid
     description: The type of registration (rigid, non-rigid at low resolution, non-rigid
       at high resolution)
-  max_proc_size:
+  f_max_proc_size:
     display_name: Low Resolution
     type:
       id: integer
@@ -73,7 +73,7 @@ inputs:
     default: 850
     description: The resolution on which the rigid and non-rigid registrations are
       performed. Must not exceed High Resolution.
-  micro_max_proc_size:
+  g_micro_max_proc_size:
     display_name: High Resolution
     type:
       id: integer
