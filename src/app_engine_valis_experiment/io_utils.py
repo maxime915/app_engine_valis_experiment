@@ -68,23 +68,23 @@ def read_optional_parameter(input_dir: pathlib.Path, key: str):
 def find_inputs():
     dir_i, _ = get_io_dirs()
 
-    fixed_image = dir_i / "fixed_image"
+    fixed_image = dir_i / "a_fixed_image"
     _expect(fixed_image, "file")
-    moving_image = dir_i / "moving_image"
+    moving_image = dir_i / "b_moving_image"
     _expect(moving_image, "file")
-    geometry_moving = dir_i / "geometry_moving"
+    geometry_moving = dir_i / "c_geometry_moving"
     if not geometry_moving.is_file():
         geometry_moving = None
 
-    micro_max_proc_size = read_optional_parameter(dir_i, "micro_max_proc_size")
+    micro_max_proc_size = read_optional_parameter(dir_i, "g_micro_max_proc_size")
 
     return InputData(
         fixed_image=fixed_image,
         moving_image=moving_image,
         geometry_moving=geometry_moving,
-        crop=read_parameter(dir_i, "crop"),  # type: ignore
-        registration_type=read_parameter(dir_i, "registration_type"),  # type: ignore
-        max_proc_size=int(read_parameter(dir_i, "max_proc_size")),
+        crop=read_parameter(dir_i, "d_crop"),  # type: ignore
+        registration_type=read_parameter(dir_i, "e_registration_type"),  # type: ignore
+        max_proc_size=int(read_parameter(dir_i, "f_max_proc_size")),
         micro_max_proc_size=(
             None if not micro_max_proc_size else int(micro_max_proc_size)
         ),

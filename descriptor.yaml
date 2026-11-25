@@ -1,6 +1,6 @@
 name: VALIS experiment
 name_short: app_engine_valis_exp
-version: 0.1.9
+version: 0.1.13
 namespace: be.cytomine.research.exp.valis
 #$schema: https://cytomine.com/schema-store/tasks/task.v0.json
 $schema: https://raw.githubusercontent.com/cytomine/cytomine/refs/heads/main/app-engine/src/main/resources/schemas/tasks/task.v0.json
@@ -21,7 +21,7 @@ configuration:
   input_folder: /inputs
   output_folder: /outputs
   image:
-    file: /app_engine_valis_exp-0.1.9.tar
+    file: /app_engine_valis_exp-0.1.13.tar
   resources:
     ram: 8Gi
     cpus: 2
@@ -89,21 +89,21 @@ outputs:
     type: image
     description: Moving image deformed to match the fixed image
     dependencies:
-      derived_from: inputs/moving_image
+      derived_from: inputs/b_moving_image
   deformed_geometry_fixed:
     display_name: Deformed Geometry (Fixed Image)
     type: geometry
     optional: true
-    description: geometry_moving mapped onto the fixed image coordinates. Only
-      produced if geometry_moving is given.
+    description: The moving geometry mapped onto the fixed image coordinates. Only
+      produced if the moving geometry is given.
     dependencies:
-      derived_from: inputs/fixed_image
+      derived_from: inputs/a_fixed_image
   deformed_geometry_registration:
     display_name: Deformed Geometry (Registration Space)
     type: geometry
     optional: true
-    description: geometry_moving warped into the registration space, i.e. the
-      coordinates of the Deformed Moving Image. Only produced if geometry_moving
+    description: The moving geometry warped into the registration space, i.e. the
+      coordinates of the Deformed Moving Image. Only produced if the moving geometry
       is given.
   valis_stdout:
     display_name: VALIS log (out)

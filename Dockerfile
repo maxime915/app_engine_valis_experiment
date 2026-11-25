@@ -10,19 +10,29 @@
 # decision) and a proper multi-stage build so build tools never reach the
 # final image. libvips/openslide/openjdk are pulled as prebuilt Debian
 # packages instead of being compiled from source.
+#
+# Python dependencies are installed from uv.lock (frozen), so the image runs
+# exactly the same package versions as the local `uv sync` environment,
+# including the CPU-only torch/torchvision wheels pinned there.
 
 FROM python:3.11-slim-bookworm AS builder
 
-ARG TORCH_VERSION=2.7.1
-ARG TORCHVISION_VERSION=0.22.1
+COPY --from=ghcr.io/astral-sh/uv:0.8.13 /uv /usr/local/bin/uv
+
 ARG BF_VERSION=7.0.0
 
+# UV_PYTHON: build the venv on the base image's interpreter, which also exists
+#   at the same path in the runtime image (venvs are not relocatable).
+# UV_PROJECT_ENVIRONMENT: create the venv at its final path.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
     HOME=/root \
     TORCH_HOME=/opt/torch \
     JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 \
+    UV_PYTHON=/usr/local/bin/python3.11 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
+    UV_LINK_MODE=copy \
     VIRTUAL_ENV=/app/.venv \
     PATH=/app/.venv/bin:$PATH
 
@@ -36,19 +46,17 @@ RUN apt-get update \
         openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
-# venvs are not relocatable: create it at its final path in the runtime image.
-RUN python3 -m venv /app/.venv
+# Third-party dependencies only (cached layer, unaffected by source changes).
+# --frozen: fail instead of re-resolving if uv.lock is out of date.
+COPY pyproject.toml uv.lock /build/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
-# CPU-only pytorch/torchvision wheels first, so installing valis-wsi
-# afterwards is satisfied by them instead of pulling GPU builds from PyPI.
-RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu \
-    "torch==${TORCH_VERSION}+cpu" \
-    "torchvision==${TORCHVISION_VERSION}+cpu"
-
-# Application code, installed together with valis-wsi (see pyproject.toml).
-COPY pyproject.toml LICENSE README.md /build/
+# Application code, installed non-editable since /build is not kept.
+COPY LICENSE README.md /build/
 COPY src /build/src
-RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable
 
 # Bio-Formats jar is expected next to the valis package itself.
 RUN wget -q "https://downloads.openmicroscopy.org/bio-formats/${BF_VERSION}/artifacts/bioformats_package.jar" \

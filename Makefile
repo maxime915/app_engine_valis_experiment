@@ -13,14 +13,14 @@ SCHEMA_CACHE := .cache/schema-$(shell printf '%s' '$(SCHEMA_URL)' | md5sum | cut
 
 zip: $(NAME).zip
 
-$(NAME).zip:	descriptor logo.png $(NAME)-$(VERSION).tar
+$(NAME).zip:	descriptor $(NAME)-$(VERSION).tar
 ifdef PIGZ
 	rm -f $(NAME).zip
 	pigz -K -p $(shell nproc) -c $(NAME)-$(VERSION).tar > $(NAME).zip
-	zip $(NAME).zip descriptor.yaml logo.png
+	zip $(NAME).zip descriptor.yaml
 else
 	rm -f $(NAME).zip
-	zip $(NAME).zip $(NAME)-$(VERSION).tar descriptor.yaml logo.png
+	zip $(NAME).zip $(NAME)-$(VERSION).tar descriptor.yaml
 endif
 
 descriptor: $(SCHEMA_CACHE)
